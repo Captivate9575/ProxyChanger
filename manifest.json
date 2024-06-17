@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "Proxy Changer",
+  "description": "Rotate between Mullvad proxy servers to combat blocking.",
+  "version": "1",
+  "icons": {
+    "48": "locked.svg"
+  },
+
+  "browser_action": {
+    "default_popup": "popup.html"
+  },
+
+  "permissions": [
+    "proxy",
+    "storage"
+  ]
+}
