@@ -39,6 +39,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 3000);
   }
 
+  function getProxySettings() {
+    browser.proxy.settings.get({}).then((result) => {
+        console.log("Current Proxy Settings:", result.value.passthrough);
+        allowedHosts = result.value.passthrough
+    }).catch((error) => {
+        console.error(`Error: ${error}`);
+    });
+  }
+
+  let allowedHosts;
+  getProxySettings();
+
   function selectRandomProxy() {
     const randomList = Math.floor(Math.random() * proxyList.length);
     const randomProxy = proxyList[randomList];
@@ -48,7 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
       socksVersion: 5,
       socks: randomProxy,
       port: 1080,
-      proxyDNS: true
+      proxyDNS: true,
+      passthrough: allowedHosts
     };
 
     browser.proxy.settings.set({ value: proxySettings }).then(() => {
