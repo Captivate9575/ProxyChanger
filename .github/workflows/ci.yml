@@ -6,19 +6,19 @@ on:
   pull_request:
 
 jobs:
-  lint:
-    name: "Lint"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v1
+  # lint:
+  #   name: "Lint"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: "Checkout"
+  #       uses: actions/checkout@v1
 
-      - name: "web-ext lint"
-        uses: kewisch/action-web-ext@v1
-        with:
-          cmd: lint
-          source: .
-          channel: listed
+  #     - name: "web-ext lint"
+  #       uses: kewisch/action-web-ext@v1
+  #       with:
+  #         cmd: lint
+  #         source: .
+  #         channel: listed
 
   build:
     name: "Build"
@@ -62,10 +62,17 @@ jobs:
         with:
           cmd: sign
           source: ${{ steps.web-ext-build.outputs.target }}
-          channel: unlisted
+          channel: listed
           apiKey: ${{ secrets.AMO_SIGN_KEY }}
           apiSecret: ${{ secrets.AMO_SIGN_SECRET }}
           timeout: 900000
+
+      - name: Bump version and push tag
+        id: bump
+        uses: anothrNick/github-tag-action@v1 # Don't use @master or @v1 unless you're happy to test the latest version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # if you don't want to set write permissions use a PAT token
+          WITH_V: false
 
       - name: "Create Release"
         uses: softprops/action-gh-release@v1
@@ -73,3 +80,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: ${{ steps.web-ext-sign.outputs.target }}
+          tag_name: ${{ steps.bump.outputs.new_tag }}
