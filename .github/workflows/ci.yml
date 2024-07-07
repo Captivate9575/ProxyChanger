@@ -20,27 +20,27 @@ jobs:
   #         source: .
   #         channel: listed
 
-  build:
-    name: "Build"
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v1
+  # build:
+  #   name: "Build"
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: "Checkout"
+  #       uses: actions/checkout@v1
 
-      - name: "web-ext build"
-        id: web-ext-build
-        uses: kewisch/action-web-ext@v1
-        with:
-          cmd: build
-          source: .
-          filename: "{name}-{version}.xpi"
-          ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
+  #     - name: "web-ext build"
+  #       id: web-ext-build
+  #       uses: kewisch/action-web-ext@v1
+  #       with:
+  #         cmd: build
+  #         source: .
+  #         filename: "{name}-{version}.xpi"
+  #         ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
 
-      - name: "Upload Artifact"
-        uses: actions/upload-artifact@v3
-        with:
-          name: target.xpi
-          path: ${{ steps.web-ext-build.outputs.target }}
+  #     - name: "Upload Artifact"
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: target.xpi
+  #         path: ${{ steps.web-ext-build.outputs.target }}
 
   sign:
     name: "Release"
@@ -48,6 +48,19 @@ jobs:
     steps:
       - name: "Checkout"
         uses: actions/checkout@v1
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Create Tag
+        id: create_tag
+        run: |
+          TAG="v$(date +'%Y%m%d%H%M%S')"
+          git tag $TAG
+          git push origin $TAG
+          echo "::set-output name=tag::$TAG"
 
       - name: "web-ext build"
         id: web-ext-build
@@ -67,22 +80,10 @@ jobs:
           apiSecret: ${{ secrets.AMO_SIGN_SECRET }}
           timeout: 900000
 
-      - name: Tag the repository
-        id: tag
-        run: |
-          # See https://docs.github.com/en/get-started/using-git/dealing-with-special-characters-in-branch-and-tag-names
-          TAG=v$(date -Iseconds | sed 's/[T:\+]/-/g')
-          echo "$TAG"
-          echo "tag=$TAG" >> $GITHUB_OUTPUT
-          git config user.name "GitHub Action"
-          git config user.email "github@action.com"
-          git tag -a $TAG -m "Published version $TAG" ${GITHUB_SHA}
-          git push origin $TAG
-
       - name: "Create Release"
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: ${{ steps.web-ext-sign.outputs.target }}
-          tag_name: ${{ steps.tag.outputs.tag }}
+          tag_name: ${{ steps.create_tag.outputs.tag }}
