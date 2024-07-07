@@ -2,7 +2,7 @@ name: "Build"
 on:
   push:
     branches:
-      - main
+      - actions
   pull_request:
 
 jobs:
