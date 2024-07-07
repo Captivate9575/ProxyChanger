@@ -49,26 +49,11 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v1
 
-      - name: Set up Git
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      
-      - name: Authenticate with GitHub
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-
-      - name: Create Tag
-        id: create_tag
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate Tag
+        id: generate_tag
         run: |
           TAG="v$(date +'%Y%m%d%H%M%S')"
-          git tag $TAG
-          git push origin $TAG
-          echo "::set-output name=tag::$TAG"
+          echo "TAG=$TAG" >> $GITHUB_ENV
 
       - name: "web-ext build"
         id: web-ext-build
@@ -77,21 +62,21 @@ jobs:
           cmd: build
           source: .
 
-      - name: "web-ext sign"
-        id: web-ext-sign
-        uses: kewisch/action-web-ext@v1
-        with:
-          cmd: sign
-          source: ${{ steps.web-ext-build.outputs.target }}
-          channel: listed
-          apiKey: ${{ secrets.AMO_SIGN_KEY }}
-          apiSecret: ${{ secrets.AMO_SIGN_SECRET }}
-          timeout: 900000
+      # - name: "web-ext sign"
+      #   id: web-ext-sign
+      #   uses: kewisch/action-web-ext@v1
+      #   with:
+      #     cmd: sign
+      #     source: ${{ steps.web-ext-build.outputs.target }}
+      #     channel: listed
+      #     apiKey: ${{ secrets.AMO_SIGN_KEY }}
+      #     apiSecret: ${{ secrets.AMO_SIGN_SECRET }}
+      #     timeout: 900000
 
       - name: "Create Release"
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ${{ steps.web-ext-sign.outputs.target }}
-          tag_name: ${{ steps.create_tag.outputs.tag }}
+          files: ${{ steps.web-ext-build.outputs.target }}
+          tag_name: ${{ env.TAG }}
