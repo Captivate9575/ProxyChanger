@@ -52,11 +52,17 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v1
 
-      - name: Generate Tag
-        id: generate_tag
+      # - name: Generate Tag
+      #   id: generate_tag
+      #   run: |
+      #     TAG="v$(date +'%Y%m%d%H%M%S')"
+      #     echo "TAG=$TAG" >> $GITHUB_ENV
+      
+      - name: Extract Version from manifest.json
+        id: extract_version
         run: |
-          TAG="v$(date +'%Y%m%d%H%M%S')"
-          echo "TAG=$TAG" >> $GITHUB_ENV
+          VERSION=$(jq -r '.version' manifest.json)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: "web-ext build"
         id: web-ext-build
@@ -82,4 +88,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           files: ${{ steps.web-ext-build.outputs.target }}
-          tag_name: ${{ env.TAG }}
+          tag_name: ${{ env.VERSION }}
