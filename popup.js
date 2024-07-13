@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
       socksVersion: 5,
       socks: randomProxy,
       port: 1080,
-      proxyDNS: true,
       passthrough: allowedHosts
     };
 

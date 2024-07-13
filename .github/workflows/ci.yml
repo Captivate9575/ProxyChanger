@@ -9,42 +9,6 @@ permissions:
   contents: write
 
 jobs:
-  # lint:
-  #   name: "Lint"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout"
-  #       uses: actions/checkout@v1
-
-  #     - name: "web-ext lint"
-  #       uses: kewisch/action-web-ext@v1
-  #       with:
-  #         cmd: lint
-  #         source: .
-  #         channel: listed
-
-  # build:
-  #   name: "Build"
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: "Checkout"
-  #       uses: actions/checkout@v1
-
-  #     - name: "web-ext build"
-  #       id: web-ext-build
-  #       uses: kewisch/action-web-ext@v1
-  #       with:
-  #         cmd: build
-  #         source: .
-  #         filename: "{name}-{version}.xpi"
-  #         ignoreFiles: '[ "package.json","package-lock.json","yarn.lock" ]'
-
-  #     - name: "Upload Artifact"
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: target.xpi
-  #         path: ${{ steps.web-ext-build.outputs.target }}
-
   sign:
     name: "Release"
     runs-on: ubuntu-latest
@@ -52,12 +16,6 @@ jobs:
       - name: "Checkout"
         uses: actions/checkout@v1
 
-      # - name: Generate Tag
-      #   id: generate_tag
-      #   run: |
-      #     TAG="v$(date +'%Y%m%d%H%M%S')"
-      #     echo "TAG=$TAG" >> $GITHUB_ENV
-      
       - name: Extract Version from manifest.json
         id: extract_version
         run: |
